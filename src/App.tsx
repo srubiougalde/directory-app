@@ -1,24 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import moment from "moment";
+
+import Main from "./pages/Main";
+import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import MomentUtils from "@date-io/moment";
+import "moment/locale/es";
+import { ToastContainer } from 'react-toastify';
+
+moment.locale("es"); // it is required to select default locale manually
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+        <MuiPickersUtilsProvider utils={MomentUtils} locale={'en'}>
+          <Main />
+        </MuiPickersUtilsProvider>
+        <ToastContainer />
     </div>
   );
 }
