@@ -22,6 +22,13 @@ import {
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { MEMBERS } from "../Endpoints";
 import { PRIMARYCOLOR  } from "../Utils";
+import { IconButton } from "@material-ui/core";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from '@material-ui/icons/Delete';
+import PeopleIcon from "@material-ui/icons/People";
+import ConfirmDialog from "../components/confirm-dialog/ConfirmDialog.component";
+import EditMember from "./modal/EditMember.component";
+import { toast } from "react-toastify";
 
 const theme = createTheme(
   {
@@ -85,9 +92,59 @@ const Home: React.FC = () => {
   const [members, setMembers] = React.useState<Members[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [loadingMembers, setLoadingMembers] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [member, setMember] = React.useState({} as Members)
+  const [markDelete, setMarkDelete] = React.useState(false);
+  const [idMemberToDelete, setIdMemberToDelete] = React.useState('');
+
+  const handleClose = () => {
+    setMarkDelete(false);
+  };
+
+  const handleConfirm = () => {
+    deleteMember(idMemberToDelete)
+    setMarkDelete(false);
+  };
+
+  const deleteMember = async (id: string) => {
+    try {
+      await axios.delete(`${MEMBERS}/${id}`);
+      toast.success("Member deleted");
+      loadMembers();
+    } catch (error) {
+      console.log(error);
+      toast.error("Ocurrió un error al borrar la empresa");
+    }
+  };
 
   const columns = [
     ...defaultColumns,
+    {
+      field: "id",
+      headerName: "Actions",
+      flex: 1.5,
+      disableColumnMenu: true,
+      sortable: false,
+      filterable: false,
+      renderCell: (params: GridCellParams) => (
+        <>
+          <IconButton onClick={() => {  }}>
+            <PeopleIcon />
+          </IconButton>
+          <IconButton onClick={() => { setOpen(true); setMember(params.row as Members) }}>
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              setIdMemberToDelete(params.row.id)
+              setMarkDelete(true)
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </>
+      ),
+    }
   ];
 
   const loadMembers = async () => {
@@ -133,6 +190,13 @@ const Home: React.FC = () => {
           </div>
         </div>
       </PageBox>
+      <EditMember
+        open={open}
+        handleClose={() => { setOpen(false) }}
+        refreshDataCb={loadMembers}
+        member={member}
+      />
+      <ConfirmDialog open={markDelete} onClose={handleClose} onConfirm={handleConfirm} title={"Delete member"} message={"This operation cannot be undone!"} />
     </div>
   );
 };
